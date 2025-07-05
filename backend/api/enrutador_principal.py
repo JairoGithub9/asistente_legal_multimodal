@@ -7,6 +7,11 @@ from .modelos_pydantic import Caso, CasoCreacion
 from datetime import datetime
 import uuid
 
+
+# Importamos nuestros modelos y el nuevo agente
+from .modelos_pydantic import Caso, CasoCreacion, Evidencia
+from ..agentes import agente_procesador_evidencia
+
 # Creamos un enrutador
 router = APIRouter(
     tags=["Casos"], # Cambiamos la etiqueta a "Casos" para mejor organización
@@ -21,7 +26,7 @@ db_casos: dict[str, Caso] = {}
 # ====================================================================
 
 
-@router.get("/")
+@router.get("/",include_in_schema=False)
 def leer_raiz():
     """
     Endpoint principal que devuelve un saludo de bienvenida.
@@ -61,34 +66,42 @@ def obtener_caso(id_caso: str):
 
 
 
-@router.post("/casos/{id_caso}/evidencia")
+@router.post("/casos/{id_caso}/evidencia", response_model=Caso)
 def subir_evidencia(id_caso: str, archivo: UploadFile = File(...)):
     """
-    Sube un archivo de evidencia (PDF, audio, video, etc.) para un caso específico.
+    Sube un archivo de evidencia y activa el agente de procesamiento.
     """
-    # 1. Verificamos que el caso exista en nuestra "DB"
-    if id_caso not in db_casos:
+    # 1. Verificamos que el caso exista
+    caso_actual = db_casos.get(id_caso)
+    if not caso_actual:
         raise HTTPException(status_code=404, detail="El caso no fue encontrado")
 
-    # 2. Definimos una ruta segura para guardar el archivo
-    # Creamos una carpeta por cada caso para mantener el orden
+    # 2. Guardamos el archivo
     ruta_guardado_caso = Path("archivos_subidos") / id_caso
     ruta_guardado_caso.mkdir(parents=True, exist_ok=True)
-    
     ruta_archivo_final = ruta_guardado_caso / archivo.filename
-
-    # 3. Guardamos el archivo en el disco
     try:
         with open(ruta_archivo_final, "wb") as buffer:
             shutil.copyfileobj(archivo.file, buffer)
-        print(f"Archivo '{archivo.filename}' guardado en '{ruta_archivo_final}'")
     finally:
         archivo.file.close()
 
-    # 4. Por ahora, solo devolvemos un mensaje de éxito.
-    # Más adelante, aquí iniciaremos el procesamiento con los agentes.
-    return {
-        "mensaje": f"Archivo '{archivo.filename}' subido con éxito para el caso {id_caso}",
-        "tipo_de_contenido": archivo.content_type,
-        "ruta_guardada": str(ruta_archivo_final)
-    }
+    # 3. ¡NUEVO! Creamos el registro de la evidencia
+    nueva_evidencia = Evidencia(
+        id_evidencia=uuid.uuid4(),
+        nombre_archivo=archivo.filename,
+        ruta_archivo=str(ruta_archivo_final),
+        tipo_contenido=archivo.content_type,
+    )
+
+    # 4. ¡NUEVO! Añadimos la evidencia al caso
+    caso_actual.evidencias.append(nueva_evidencia)
+
+    # 5. ¡NUEVO! ¡Llamamos al Agente!
+    agente_procesador_evidencia.iniciar_procesamiento_de_evidencia(
+        ruta_archivo=str(ruta_archivo_final),
+        tipo_contenido=archivo.content_type
+    )
+
+    # 6. Devolvemos el caso completo y actualizado
+    return caso_actual
