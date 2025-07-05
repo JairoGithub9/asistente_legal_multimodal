@@ -1,20 +1,15 @@
-# Importamos la clase FastAPI desde la librería fastapi
-from fastapi import FastAPI
+# backend/main.py
 
-# Creamos una "instancia" de la aplicación.
-# La variable "aplicacion" será nuestro punto de referencia principal.
+from fastapi import FastAPI
+# Importamos el objeto "router" que creamos en el otro archivo
+from .api import enrutador_principal
+
 aplicacion = FastAPI(
     title="API del Asistente Legal Multimodal",
     description="Proyecto de grado para gestionar y analizar evidencia legal con agentes de IA.",
     version="0.1.0",
 )
 
-# Este es nuestro primer "endpoint" o "ruta".
-# Le decimos a FastAPI que cuando alguien visite la raíz "/" de nuestra API,
-# debe ejecutar la función que está justo debajo.
-@aplicacion.get("/")
-def leer_raiz():
-    """
-    Endpoint principal que devuelve un saludo de bienvenida.
-    """
-    return {"mensaje": "Bienvenido al Asistente Legal Multimodal. El servidor está funcionando."}
+# Le decimos a nuestra aplicación principal que use las rutas definidas
+# en nuestro enrutador_principal.
+aplicacion.include_router(enrutador_principal.router)
