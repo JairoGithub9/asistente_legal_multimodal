@@ -6,17 +6,20 @@ import uuid
 from typing import Literal
 
 # --- Modelo de Evidencia ---
+
 class Evidencia(BaseModel):
     """
     Modelo que representa una pieza de evidencia asociada a un caso.
     """
-    id_evidencia: uuid.UUID = Field(title="ID Único de la Evidencia")
-    nombre_archivo: str = Field(title="Nombre original del archivo subido")
-    ruta_archivo: str = Field(title="Ruta donde se guardó el archivo en el servidor")
-    tipo_contenido: str = Field(title="Tipo MIME del archivo (ej. application/pdf)")
-    estado_procesamiento: Literal["pendiente", "en_proceso", "completado", "error"] = Field(
-        default="pendiente",
-        title="Estado del procesamiento por los agentes"
+    id_evidencia: uuid.UUID
+    nombre_archivo: str
+    ruta_archivo: str
+    tipo_contenido: str
+    estado_procesamiento: Literal["pendiente", "en_proceso", "completado", "error"] = "pendiente"
+    # ¡NUEVO CAMPO!
+    texto_extraido: str | None = Field(
+        default=None,
+        title="Contenido textual extraído de la evidencia"
     )
 
 

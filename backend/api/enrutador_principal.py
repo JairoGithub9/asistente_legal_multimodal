@@ -66,17 +66,17 @@ def obtener_caso(id_caso: str):
 
 
 
+
+# ¡ENDPOINT ACTUALIZADO!
 @router.post("/casos/{id_caso}/evidencia", response_model=Caso)
 def subir_evidencia(id_caso: str, archivo: UploadFile = File(...)):
     """
-    Sube un archivo de evidencia y activa el agente de procesamiento.
+    Sube un archivo de evidencia, lo procesa con un agente y guarda el resultado.
     """
-    # 1. Verificamos que el caso exista
     caso_actual = db_casos.get(id_caso)
     if not caso_actual:
         raise HTTPException(status_code=404, detail="El caso no fue encontrado")
 
-    # 2. Guardamos el archivo
     ruta_guardado_caso = Path("archivos_subidos") / id_caso
     ruta_guardado_caso.mkdir(parents=True, exist_ok=True)
     ruta_archivo_final = ruta_guardado_caso / archivo.filename
@@ -86,22 +86,25 @@ def subir_evidencia(id_caso: str, archivo: UploadFile = File(...)):
     finally:
         archivo.file.close()
 
-    # 3. ¡NUEVO! Creamos el registro de la evidencia
     nueva_evidencia = Evidencia(
         id_evidencia=uuid.uuid4(),
         nombre_archivo=archivo.filename,
         ruta_archivo=str(ruta_archivo_final),
         tipo_contenido=archivo.content_type,
+        estado_procesamiento="en_proceso"  # Cambiamos el estado
     )
-
-    # 4. ¡NUEVO! Añadimos la evidencia al caso
-    caso_actual.evidencias.append(nueva_evidencia)
-
-    # 5. ¡NUEVO! ¡Llamamos al Agente!
-    agente_procesador_evidencia.iniciar_procesamiento_de_evidencia(
+    
+    # ¡NUEVO! Capturamos el resultado del agente en una variable
+    resultado_agente = agente_procesador_evidencia.iniciar_procesamiento_de_evidencia(
         ruta_archivo=str(ruta_archivo_final),
         tipo_contenido=archivo.content_type
     )
+    
+    # ¡NUEVO! Actualizamos la evidencia con el resultado del agente
+    nueva_evidencia.texto_extraido = resultado_agente.get("texto_extraido")
+    nueva_evidencia.estado_procesamiento = "completado" if nueva_evidencia.texto_extraido else "error"
+    
+    # Añadimos la evidencia ya procesada y actualizada al caso
+    caso_actual.evidencias.append(nueva_evidencia)
 
-    # 6. Devolvemos el caso completo y actualizado
     return caso_actual
