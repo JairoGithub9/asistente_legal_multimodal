@@ -20,6 +20,20 @@ class Evidencia(BaseModel):
     texto_extraido: str | None = Field(
         default=None,
         title="Contenido textual extraído de la evidencia"
+        
+    )
+     # ¡NUEVO CAMPO!
+    entidades_extraidas: list[dict] | None = Field(
+        default=None,
+        title="Lista de entidades clave extraídas del texto"
+    )
+    informacion_recuperada: list[str] | None = Field(
+        default=None,
+        title="Lista de textos relevantes recuperados de la base de conocimiento"
+    )
+    borrador_estrategia: str | None = Field(
+        default=None,
+        title="Borrador de la estrategia o síntesis generada"
     )
 
 
