@@ -24,3 +24,18 @@ body {
 main {
   padding: 0 20px;
 }
+
+/* Añadir al final de frontend/src/App.css */
+.contenedor-principal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.columna-izquierda, .columna-derecha {
+  flex: 1;
+  min-width: 300px;
+}

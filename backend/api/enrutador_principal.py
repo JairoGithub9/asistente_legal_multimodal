@@ -39,6 +39,13 @@ def obtener_caso(id_caso: str):
         raise HTTPException(status_code=404, detail="El caso no fue encontrado")
     return db_casos[id_caso]
 
+@router.get("/casos", response_model=list[Caso])
+def listar_casos():
+    """
+    Devuelve una lista de todos los casos actualmente en memoria.
+    """
+    return list(db_casos.values())
+
 
 @router.post("/casos/{id_caso}/evidencia", response_model=Caso)
 def subir_evidencia(id_caso: str, archivo: UploadFile = File(...)):

@@ -1,0 +1,31 @@
+/* frontend/src/componentes/ListaCasos/ListaCasos.css */
+.lista-casos-contenedor {
+  margin-top: 40px;
+}
+
+.lista-casos {
+  list-style-type: none;
+  padding: 0;
+}
+
+.caso-item {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.caso-item:hover {
+  background-color: #f1f1f1;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Añadir al final de ListaCasos.css */
+.caso-item.activo {
+  border-left: 5px solid #007bff;
+  font-weight: bold;
+}

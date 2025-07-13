@@ -6,7 +6,7 @@ import { crearNuevoCaso } from '../../servicios/api';
 // Importamos los estilos específicos para este componente
 import './FormularioCrearCaso.css';
 
-const FormularioCrearCaso = () => {
+const FormularioCrearCaso = ({ onCasoCreado }) => {
   const [titulo, setTitulo] = useState('');
   const [resumen, setResumen] = useState('');
 
@@ -17,10 +17,14 @@ const FormularioCrearCaso = () => {
       alert(`¡Caso creado con éxito! ID: ${casoCreado.id_caso}`);
       setTitulo('');
       setResumen('');
+      // ¡AVISAMOS A LA PÁGINA PRINCIPAL QUE REFRESQUE LA LISTA!
+      onCasoCreado(); 
     } catch (error) {
       alert(error.message,"Hubo un error al crear el caso. Revisa la consola.");
     }
   };
+
+  
 
   return (
     <form onSubmit={manejarEnvio} className="caso-form">

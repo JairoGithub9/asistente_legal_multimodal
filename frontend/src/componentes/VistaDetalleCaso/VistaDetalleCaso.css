@@ -1,0 +1,52 @@
+/* frontend/src/componentes/VistaDetalleCaso/VistaDetalleCaso.css */
+.vista-detalle-contenedor {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: left;
+  height: 100%;
+}
+
+.vista-detalle-contenedor.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+}
+
+.evidencia-card {
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 15px;
+  margin-top: 20px;
+}
+
+.detalle-seccion {
+  margin-top: 15px;
+}
+
+.detalle-seccion h5 {
+  margin-bottom: 5px;
+  color: #0056b3;
+}
+
+.detalle-seccion.estrategia {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.texto-contenido {
+  white-space: pre-wrap; /* Respeta los saltos de línea y espacios */
+  font-family: monospace;
+  background-color: #e9ecef;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: inherit;
+}

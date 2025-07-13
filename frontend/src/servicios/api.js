@@ -34,6 +34,23 @@ export const crearNuevoCaso = async (titulo, resumen) => {
   }
 };
 
+
+export const obtenerTodosLosCasos = async () => {
+  console.log("Servicio API: Pidiendo la lista de todos los casos...");
+  try {
+    const respuesta = await fetch(`${URL_BASE}/casos`);
+    if (!respuesta.ok) {
+      throw new Error(`Error del servidor: ${respuesta.status}`);
+    }
+    const casos = await respuesta.json();
+    console.log("Servicio API: Lista de casos recibida.", casos);
+    return casos;
+  } catch (error) {
+    console.error("Servicio API: Error al obtener los casos:", error);
+    throw error;
+  }
+};
+
 // En el futuro, aquí añadiremos más funciones como:
 // export const subirEvidencia = async (idCaso, archivo) => { ... }
 // export const obtenerCaso = async (idCaso) => { ... }
