@@ -54,3 +54,31 @@ export const obtenerTodosLosCasos = async () => {
 // En el futuro, aquí añadiremos más funciones como:
 // export const subirEvidencia = async (idCaso, archivo) => { ... }
 // export const obtenerCaso = async (idCaso) => { ... }
+
+export const subirEvidencia = async (idCaso, archivo) => {
+  // Usamos FormData para enviar archivos
+  const formData = new FormData();
+  formData.append("archivo", archivo);
+
+  console.log(`Servicio API: Subiendo archivo '${archivo.name}' para el caso ${idCaso}`);
+
+  try {
+    const respuesta = await fetch(`${URL_BASE}/casos/${idCaso}/evidencia`, {
+      method: 'POST',
+      // ¡Importante! No establecemos 'Content-Type'. 
+      // El navegador lo hará automáticamente con el 'boundary' correcto para FormData.
+      body: formData,
+    });
+
+    if (!respuesta.ok) {
+      throw new Error(`Error del servidor: ${respuesta.status}`);
+    }
+
+    const casoActualizado = await respuesta.json();
+    console.log("Servicio API: Evidencia subida. Caso actualizado:", casoActualizado);
+    return casoActualizado;
+  } catch (error) {
+    console.error("Servicio API: Error al subir la evidencia:", error);
+    throw error;
+  }
+};

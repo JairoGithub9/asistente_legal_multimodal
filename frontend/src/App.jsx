@@ -29,6 +29,19 @@ function App() {
     setCasoSeleccionado(caso);
   };
 
+
+
+   // ¡NUEVO! Esta función se llamará cuando se suba una evidencia
+  const manejarEvidenciaSubida = (casoActualizado) => {
+    // Actualizamos el caso seleccionado con la nueva información
+    setCasoSeleccionado(casoActualizado);
+    
+    // También actualizamos la lista general de casos para mantenerla sincronizada
+    setCasos(casosPrevios => casosPrevios.map(c => 
+      c.id_caso === casoActualizado.id_caso ? casoActualizado : c
+    ));
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -44,7 +57,11 @@ function App() {
           />
         </div>
         <div className="columna-derecha">
-          <VistaDetalleCaso casoSeleccionado={casoSeleccionado} />
+          <VistaDetalleCaso casoSeleccionado={casoSeleccionado}
+          // ¡NUEVO! Pasamos la función de actualización
+            onEvidenciaSubida={manejarEvidenciaSubida}
+          />
+          
         </div>
       </main>
     </div>

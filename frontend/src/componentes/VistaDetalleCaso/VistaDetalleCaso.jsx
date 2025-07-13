@@ -1,8 +1,11 @@
 // frontend/src/componentes/VistaDetalleCaso/VistaDetalleCaso.jsx
 import './VistaDetalleCaso.css';
+// ¡NUEVO! Importamos el formulario
+import FormularioSubirEvidencia from '../FormularioSubirEvidencia/FormularioSubirEvidencia';
+
 
 // Este componente recibe el caso seleccionado como un "prop"
-const VistaDetalleCaso = ({ casoSeleccionado }) => {
+const VistaDetalleCaso = ({ casoSeleccionado , onEvidenciaSubida }) => {
   // Si no hay ningún caso seleccionado, no mostramos nada.
   if (!casoSeleccionado) {
     return (
@@ -21,6 +24,11 @@ const VistaDetalleCaso = ({ casoSeleccionado }) => {
       <p><strong>Fecha de Creación:</strong> {new Date(casoSeleccionado.fecha_creacion).toLocaleString()}</p>
       
       <hr />
+       {/* ¡NUEVO! Añadimos el formulario de subida */}
+      <FormularioSubirEvidencia 
+        idCaso={casoSeleccionado.id_caso}
+        onEvidenciaSubida={onEvidenciaSubida}
+      />
 
       <h3>Evidencias ({casoSeleccionado.evidencias.length})</h3>
       {casoSeleccionado.evidencias.length === 0 ? (
