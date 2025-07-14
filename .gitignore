@@ -1,2 +1,4 @@
 venv/
 archivos_subidos/
+
+.env
