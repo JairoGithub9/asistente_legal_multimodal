@@ -35,6 +35,10 @@ class Evidencia(BaseModel):
         default=None,
         title="Borrador de la estrategia o síntesis generada"
     )
+    verificacion_calidad: dict | None = Field(
+        default=None,
+        title="Veredicto del Agente Guardián de Calidad"
+    )
 
 
 # --- Modelo para la Creación de un Caso ---

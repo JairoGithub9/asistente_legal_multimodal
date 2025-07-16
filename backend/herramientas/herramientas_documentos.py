@@ -4,8 +4,8 @@ def procesar_pdf_con_nougat(ruta_archivo: str) -> str:
     """
     Procesa un archivo PDF para extraer su contenido textual estructurado.
     
-    En el futuro, esta función contendrá la lógica para llamar al modelo
-    de Nougat. Por ahora, simula el procesamiento.
+    MODO SIMULACIÓN: Devuelve un texto de caso real para permitir
+    que el resto de la cadena de agentes de IA funcione correctamente.
     
     Args:
         ruta_archivo (str): La ruta local del archivo PDF a procesar.
@@ -15,9 +15,15 @@ def procesar_pdf_con_nougat(ruta_archivo: str) -> str:
     """
     print(f"      TOOL-SYSTEM: -> Herramienta 'procesar_pdf_con_nougat' activada para {ruta_archivo}")
     
-    # Lógica futura para llamar a Nougat irá aquí.
+    # Usamos el texto real de tu grabación para que Gemini tenga algo que analizar.
+    texto_simulado = """
+    Tuve un accidente de tránsito en el que sufrí lección permanente y deformación física en el rostro 
+    con capacidad superior a 180 días y solo busco reclamación de perfisos materiales que se componen 
+    de lucros en sete y daño emergente por valores 50 millones de pesos colombianos. 
+    Los responsables de la accidente es una empresa de servicio público que cuenta con aseguradora. 
+    En el 23 años trabajo en construcción con menos de un salario mínimo y no he podido volver a trabajar 
+    como consecuencia del accidente, el accidente ocurrió en la salía de Cúcuta de Complona.
+    """
     
-    texto_simulado = "Este es el texto extraído del PDF. Contiene cláusulas, artículos y hechos importantes."
-    
-    print("      TOOL-SYSTEM: -> Procesamiento de PDF completado.")
-    return texto_simulado
+    print("      TOOL-SYSTEM: -> Procesamiento de PDF (simulado con texto real) completado.")
+    return texto_simulado.strip()

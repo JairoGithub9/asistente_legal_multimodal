@@ -71,8 +71,17 @@ const VistaDetalleCaso = ({ casoSeleccionado , onEvidenciaSubida }) => {
                 <h5>Borrador de Estrategia</h5>
                 <pre>{evidencia.borrador_estrategia}</pre>
               </div>
+
             )}
+            {evidencia.verificacion_calidad && (
+  <div className={`detalle-seccion verificacion ${evidencia.verificacion_calidad.verificado ? 'verificado' : 'no-verificado'}`}>
+    <h5>Veredicto del Guardián de Calidad</h5>
+    <p><strong>¿Verificado?</strong> {evidencia.verificacion_calidad.verificado ? 'Sí' : 'No'}</p>
+    <p><strong>Observaciones:</strong> {evidencia.verificacion_calidad.observaciones}</p>
+  </div>
+)}
           </div>
+          
         ))
       )}
     </div>
