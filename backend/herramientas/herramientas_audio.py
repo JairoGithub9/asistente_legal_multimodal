@@ -1,36 +1,47 @@
-# backend/herramientas/herramientas_audio.py
-
-# Importamos la librería que acabamos de instalar
 import whisper
 
-def procesar_audio_con_whisper(ruta_archivo: str) -> str:
+# Cargamos el modelo una sola vez para eficiencia.
+try:
+    modelo_whisper = whisper.load_model("base")
+    print("TOOL-SETUP: Modelo Whisper cargado correctamente en memoria.")
+except Exception as e:
+    modelo_whisper = None
+    print(f"TOOL-SETUP-ERROR: No se pudo cargar el modelo Whisper. {e}")
+
+def procesar_audio_con_whisper(ruta_archivo: str) -> dict:
     """
-    Procesa un archivo de audio para transcribir su contenido a texto.
-    
-    Utiliza el modelo "base" de Whisper, que es multilingüe y eficiente.
-    
+    Transcribe un archivo de audio a texto utilizando el modelo Whisper de OpenAI.
+    La salida de esta función está estandarizada a un diccionario.
+
     Args:
-        ruta_archivo (str): La ruta local del archivo de audio a procesar.
+        ruta_archivo (str): La ruta completa al archivo de audio a transcribir.
 
     Returns:
-        str: El texto transcrito del audio.
+        dict: Un diccionario que contiene el texto transcrito en la clave 'texto_extraido'.
+              Si ocurre un error, el valor será None y se añadirá una clave 'error'.
     """
-    print(f"      TOOL-SYSTEM: -> Herramienta 'procesar_audio_con_whisper' activada para {ruta_archivo}")
-    
+    resultado = {"texto_extraido": None, "error": None}
+
+    if not modelo_whisper:
+        error_msg = "El modelo Whisper no está disponible o no se pudo cargar."
+        print(f"TOOL-SYSTEM-ERROR: {error_msg}")
+        resultado["error"] = error_msg
+        return resultado
+
     try:
-        # 1. Cargamos el modelo. "base" es un buen equilibrio entre velocidad y precisión.
-        print("      TOOL-SYSTEM: -> Cargando modelo Whisper (esto puede tardar la primera vez)...")
-        modelo = whisper.load_model("base")
+        print(f"      TOOL-SYSTEM: -> Herramienta 'procesar_audio_con_whisper' activada para {ruta_archivo}")
+        print("      TOOL-SYSTEM: -> Transcribiendo audio con Whisper...")
         
-        # 2. Realizamos la transcripción
-        print("      TOOL-SYSTEM: -> Transcribiendo audio...")
-        resultado = modelo.transcribe(ruta_archivo, fp16=False) # fp16=False es más compatible con CPU
+        # Realizamos la transcripción
+        transcripcion = modelo_whisper.transcribe(ruta_archivo)
+        texto_transcrito = transcripcion["text"]
         
-        texto_transcrito = resultado["text"]
-        
+        resultado["texto_extraido"] = texto_transcrito
         print("      TOOL-SYSTEM: -> Transcripción completada.")
-        return texto_transcrito
         
     except Exception as e:
-        print(f"      TOOL-SYSTEM: -> ERROR al procesar el audio: {e}")
-        return "Error durante la transcripción del audio."
+        error_msg = f"Ocurrió un error inesperado al transcribir el audio: {e}"
+        print(f"TOOL-SYSTEM-ERROR: {error_msg}")
+        resultado["error"] = error_msg
+
+    return resultado

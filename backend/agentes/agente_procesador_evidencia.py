@@ -1,39 +1,40 @@
-# backend/agentes/agente_procesador_evidencia.py
+from ..herramientas import herramientas_documentos, herramientas_audio
 
-# Importamos la herramienta que acabamos de crear
-from ..herramientas import herramientas_documentos,herramientas_audio
-
-
-def iniciar_procesamiento_de_evidencia(ruta_archivo: str, tipo_contenido: str):
+def iniciar_procesamiento_de_evidencia(ruta_archivo: str, tipo_contenido: str) -> dict:
     """
-    Función de entrada para el Agente Procesador de Evidencia.
-    Ahora es capaz de procesar tanto PDFs como archivos de audio.
+    Decide qué herramienta de procesamiento utilizar basándose en el tipo de contenido
+    del archivo de evidencia y la ejecuta.
+
+    Args:
+        ruta_archivo (str): La ruta al archivo de evidencia.
+        tipo_contenido (str): El tipo MIME del archivo (ej. 'audio/mpeg', 'application/pdf').
+
+    Returns:
+        dict: Un diccionario con el resultado del procesamiento. La estructura exacta
+              depende de la herramienta que se haya llamado.
     """
-    print("\n" + "="*50)
+    print("\n==================================================")
     print("AGENT-SYSTEM: ¡AGENTE PROCESADOR DE EVIDENCIA ACTIVADO!")
     print(f"AGENT-SYSTEM: Analizando el archivo: {ruta_archivo}")
     print(f"AGENT-SYSTEM: Tipo de contenido detectado: {tipo_contenido}")
-    
-    texto_extraido = ""
 
-    # Lógica de decisión del agente
-    if "pdf" in tipo_contenido:
-        print("AGENT-SYSTEM: Decisión: Es un PDF. Llamando a la herramienta de documentos...")
-        texto_extraido = herramientas_documentos.procesar_pdf_con_nougat(ruta_archivo)
-    
-    elif "audio" in tipo_contenido:
-        # ¡LÓGICA ACTUALIZADA!
+    resultado_procesador = {}
+
+    if 'audio' in tipo_contenido:
         print("AGENT-SYSTEM: Decisión: Es un AUDIO. Llamando a la herramienta de transcripción...")
-        texto_extraido = herramientas_audio.procesar_audio_con_whisper(ruta_archivo)
-        
-    elif "video" in tipo_contenido:
-        print("AGENT-SYSTEM: Decisión: Es un VIDEO. (La herramienta de video aún no está implementada).")
-        # texto_extraido = herramientas_video.procesar_video_con_yolo(ruta_archivo)
-        
+        resultado_procesador = herramientas_audio.procesar_audio_con_whisper(ruta_archivo)
+
+    elif 'pdf' in tipo_contenido:
+        print("AGENT-SYSTEM: Decisión: Es un PDF. Llamando a la herramienta de procesamiento de documentos (Nougat)...")
+        # Llamamos a la nueva función real para PDFs
+        resultado_procesador = herramientas_documentos.procesar_pdf_con_nougat(ruta_archivo)
+
     else:
-        print(f"AGENT-SYSTEM: Decisión: Tipo de archivo '{tipo_contenido}' no soportado todavía.")
+        print("AGENT-SYSTEM: Decisión: Tipo de archivo no soportado directamente. Usando simulación...")
+        # Como respaldo, usamos la función simulada para otros tipos de documentos
+        resultado_procesador = herramientas_documentos.procesar_documento_simulado(ruta_archivo)
 
-    print(f"AGENT-SYSTEM: Resultado del procesamiento: '{texto_extraido[:150]}...'") # Mostramos más caracteres ahora
-    print("="*50 + "\n")
-
-    return {"estado": "Procesamiento completado", "texto_extraido": texto_extraido}
+    print(f"AGENT-SYSTEM: Resultado del procesamiento: '{str(resultado_procesador.get('texto_extraido'))[:100]}...'")
+    print("==================================================\n")
+    
+    return resultado_procesador
