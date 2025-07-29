@@ -59,6 +59,7 @@ def subir_evidencia(id_caso: str, archivo: UploadFile = File(...)):
     finally:
         archivo.file.close()
 
+    # Creamos un nuevo objeto de evidencia
     nueva_evidencia = Evidencia(
         id_evidencia=uuid.uuid4(),
         nombre_archivo=archivo.filename,
@@ -70,7 +71,8 @@ def subir_evidencia(id_caso: str, archivo: UploadFile = File(...)):
     # --- LLAMADA AL AGENTE 1: PROCESADOR ---
     resultado_procesador = agente_procesador_evidencia.iniciar_procesamiento_de_evidencia(
         ruta_archivo=str(ruta_archivo_final),
-        tipo_contenido=archivo.content_type
+        tipo_contenido=archivo.content_type,
+        id_caso=id_caso # <--- El nuevo argumento que hemos añadido
     )
     nueva_evidencia.texto_extraido = resultado_procesador.get("texto_extraido")
 

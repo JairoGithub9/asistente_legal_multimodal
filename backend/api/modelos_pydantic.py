@@ -5,71 +5,52 @@ from datetime import datetime
 import uuid
 from typing import Literal
 
-# --- Modelo de Evidencia ---
-
 class Evidencia(BaseModel):
     """
-    Modelo que representa una pieza de evidencia asociada a un caso.
+    Define la estructura de un único archivo de evidencia y todos los
+    resultados de su análisis por la cadena de agentes.
     """
     id_evidencia: uuid.UUID
     nombre_archivo: str
     ruta_archivo: str
     tipo_contenido: str
     estado_procesamiento: Literal["pendiente", "en_proceso", "completado", "error"] = "pendiente"
-    # ¡NUEVO CAMPO!
+    
+    # --- Campos llenados por los agentes de IA ---
     texto_extraido: str | None = Field(
-        default=None,
-        title="Contenido textual extraído de la evidencia"
-        
+        default=None, title="Contenido textual extraído de la evidencia (transcripción, OCR, etc.)"
     )
-     # ¡NUEVO CAMPO!
     entidades_extraidas: list[dict] | None = Field(
-        default=None,
-        title="Lista de entidades clave extraídas del texto"
+        default=None, title="Lista de entidades clave (hechos, fechas, nombres) extraídas del texto"
     )
     informacion_recuperada: list[str] | None = Field(
-        default=None,
-        title="Lista de textos relevantes recuperados de la base de conocimiento"
+        default=None, title="Lista de textos relevantes recuperados de la base de conocimiento (RAG)"
     )
     borrador_estrategia: str | None = Field(
-        default=None,
-        title="Borrador de la estrategia o síntesis generada"
+        default=None, title="Borrador de la estrategia o síntesis legal generada por la IA"
     )
+    
+    # ¡AQUÍ ESTÁ LA CORRECCIÓN!
+    # Añadimos el campo que el Agente Guardián produce.
     verificacion_calidad: dict | None = Field(
-        default=None,
-        title="Veredicto del Agente Guardián de Calidad"
+        default=None, title="El veredicto del Agente Guardián sobre la calidad del borrador"
     )
 
 
-# --- Modelo para la Creación de un Caso ---
 class CasoCreacion(BaseModel):
     """
-    Modelo de datos para la creación de un nuevo caso.
+    Modelo para la creación de un nuevo caso. Contiene solo los datos
+    que el usuario proporciona inicialmente.
     """
-    titulo: str = Field(
-        ...,
-        title="Título del Caso",
-        description="Un nombre descriptivo y corto para el caso legal.",
-        min_length=5,
-        max_length=100,
-        examples=["Caso de arrendamiento local 201"]
-    )
-    resumen: str | None = Field(
-        default=None,
-        title="Resumen Preliminar del Caso",
-        description="Una descripción inicial de los hechos o la situación del caso.",
-        max_length=500
-    )
+    titulo: str = Field(..., min_length=3, max_length=100, description="El título principal del caso.")
+    resumen: str | None = Field(default=None, max_length=500, description="Un breve resumen o descripción del caso.")
 
-# --- Modelo de Caso Completo ---
+
 class Caso(CasoCreacion):
     """
-    Modelo completo del Caso, incluyendo datos del sistema y su lista de evidencias.
+    El modelo completo del Caso, incluyendo los campos generados por el sistema
+    y la lista de todas las evidencias asociadas.
     """
     id_caso: uuid.UUID
     fecha_creacion: datetime
-    # ¡NUEVO! Un caso ahora puede contener una lista de evidencias.
-    evidencias: list[Evidencia] = Field(
-        default_factory=list, # Por defecto, es una lista vacía.
-        title="Lista de evidencias del caso"
-    )
+    evidencias: list[Evidencia] = Field(default_factory=list)
