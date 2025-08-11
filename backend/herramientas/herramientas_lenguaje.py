@@ -8,28 +8,31 @@ import json
 from dotenv import load_dotenv
 import google.generativeai as genai
 
+from PIL import Image
+
+import time
 
 
-
-# --- Configuración Inicial del Cerebro ---
-# Cargamos las variables de entorno (nuestra clave de API) desde el archivo .env
 load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 
+modelo_gemini_pro = None
+modelo_gemini_flash = None
+
 if not api_key:
-    print("TOOL-SETUP: ERROR! No se encontró la GOOGLE_API_KEY en el archivo .env")
-    # Podríamos lanzar un error aquí para detener el programa si la clave no existe
+    print("TOOL-SETUP-ERROR: No se encontró la GOOGLE_API_KEY en el archivo .env")
 else:
-    # Configuramos la API de Google
     genai.configure(api_key=api_key)
     print("TOOL-SETUP: API de Gemini configurada correctamente.")
+    # 2. ¡OPTIMIZACIÓN! Creamos los modelos una sola vez para reutilizarlos.
+    # Usaremos el 1.5 Pro para las tareas multimodales (video) y de alta calidad.
+    modelo_gemini_pro = genai.GenerativeModel('gemini-1.5-pro-latest')
+    # Usaremos el 1.5 Flash para tareas más rápidas y sencillas como la revisión.
+    modelo_gemini_flash = genai.GenerativeModel('gemini-1.5-flash-latest') #gemini-2.5-pro-exp-03-25  gemini-1.5-flash-latest
+    print("TOOL-SETUP: Modelos Gemini (Pro y Flash) inicializados.")
 
-# =================================================================================
-# ¡CONFIGURACIÓN INICIAL! Esto se ejecutaría una sola vez o al iniciar el servidor.
-# Por simplicidad, lo ponemos aquí por ahora.
-# =================================================================================
 
-# 1. Cargar los documentos de nuestra base de conocimiento
+# 3. Cargar la base de conocimiento local
 try:
     with open("datos/base_de_conocimiento_juridico/leyes_basicas.txt", "r", encoding="utf-8") as f:
         documentos_legales = f.read().split('---')
@@ -37,15 +40,14 @@ try:
     print("TOOL-SETUP: Base de conocimiento cargada correctamente.")
 except FileNotFoundError:
     documentos_legales = ["Error: No se encontró el archivo de la base de conocimiento."]
-    print("TOOL-SETUP: ERROR! No se encontró el archivo de la base de conocimiento.")
+    print("TOOL-SETUP-ERROR: No se encontró el archivo de la base de conocimiento.")
 
-
-# 2. Cargar el modelo para convertir texto a vectores
+# 4. Cargar el modelo para la búsqueda vectorial (RAG)
 print("TOOL-SETUP: Cargando modelo de SentenceTransformer...")
 modelo_sentencias = SentenceTransformer('all-MiniLM-L6-v2')
-print("TOOL-SETUP: Modelo cargado.")
+print("TOOL-SETUP: Modelo SentenceTransformer cargado.")
 
-# 3. Crear el índice vectorial (la "base de datos" de búsqueda)
+# 5. Crear el índice vectorial FAISS
 print("TOOL-SETUP: Creando índice vectorial FAISS...")
 embeddings_documentos = modelo_sentencias.encode(documentos_legales)
 indice_faiss = faiss.IndexFlatL2(embeddings_documentos.shape[1])
@@ -69,7 +71,7 @@ def extraer_entidades_con_llm(texto: str) -> list[dict]:
         return [{"entidad": "Error de configuración de API", "tipo": "Error"}]
 
 
-    modelo_gemini = genai.GenerativeModel('gemini-1.5-flash-latest') #gemini-2.5-pro-exp-03-25  gemini-1.5-flash-latest
+    
     
     prompt = f"""
     Eres un asistente legal experto en análisis de documentos en Colombia.
@@ -92,7 +94,7 @@ def extraer_entidades_con_llm(texto: str) -> list[dict]:
     
     try:
         print("      TOOL-SYSTEM: -> Llamando a la API de Gemini para extraer entidades...")
-        respuesta = modelo_gemini.generate_content(prompt)
+        respuesta = modelo_gemini_flash.generate_content(prompt)
         
         respuesta_texto = respuesta.text
         if respuesta_texto.strip().startswith("```json"):
@@ -140,7 +142,7 @@ def generar_sintesis_con_llm(contexto: str) -> str:
     print("      TOOL-SYSTEM: -> Herramienta REAL 'generar_sintesis_con_llm' activada.")
     
     # 1. Seleccionamos el modelo
-    modelo_gemini = genai.GenerativeModel('gemini-1.5-flash-latest')
+   
     
     # 2. Diseñamos un prompt específico para la tarea de síntesis
     prompt = f"""
@@ -166,7 +168,7 @@ def generar_sintesis_con_llm(contexto: str) -> str:
     try:
         # 3. Hacemos la llamada a la API de Gemini
         print("      TOOL-SYSTEM: -> Llamando a la API de Gemini para generar la síntesis...")
-        respuesta = modelo_gemini.generate_content(prompt)
+        respuesta = modelo_gemini_flash.generate_content(prompt)
         
         print("      TOOL-SYSTEM: -> Síntesis de Gemini recibida.")
         return respuesta.text
@@ -188,7 +190,7 @@ def verificar_calidad_con_llm(borrador: str, contexto_original: str) -> dict:
     if not api_key:
         return {"verificado": False, "observaciones": "Error: La clave de API no está configurada."}
 
-    modelo_gemini = genai.GenerativeModel('gemini-1.5-flash-latest') # Usamos flash, es suficiente para una revisión
+     # Usamos flash, es suficiente para una revisión
     
     prompt = f"""
     Eres un auditor legal extremadamente meticuloso y escéptico.
@@ -215,7 +217,7 @@ def verificar_calidad_con_llm(borrador: str, contexto_original: str) -> dict:
     
     try:
         print("      TOOL-SYSTEM: -> Llamando a Gemini para la verificación de calidad...")
-        respuesta = modelo_gemini.generate_content(prompt)
+        respuesta = modelo_gemini_flash.generate_content(prompt)
         
         respuesta_texto = respuesta.text
         if respuesta_texto.strip().startswith("```json"):
@@ -226,4 +228,54 @@ def verificar_calidad_con_llm(borrador: str, contexto_original: str) -> dict:
         return veredicto
     except Exception as e:
         print(f"      TOOL-SYSTEM: -> ERROR al verificar la calidad con Gemini: {e}")
-        return {"verificado": False, "observaciones": f"Error técnico durante la verificación: {e}"}    
+        return {"verificado": False, "observaciones": f"Error técnico durante la verificación: {e}"}   
+
+
+
+
+
+#-----------------------        
+
+
+
+def describir_imagenes_con_gemini(rutas_imagenes: list[str], prompt_texto: str) -> list[str]:
+    """
+    Analiza una lista de imágenes usando Gemini-Flash para mayor velocidad y
+    para respetar los límites de la API de la capa gratuita.
+    """
+    descripciones = []
+    print(f"      TOOL-SYSTEM: -> Herramienta 'describir_imagenes_con_gemini' activada para {len(rutas_imagenes)} imágenes.")
+    
+    # --- ¡AQUÍ ESTÁ EL CAMBIO ESTRATÉGICO! ---
+    # Usamos el modelo FLASH, que es más rápido y tiene una cuota más generosa.
+    if not modelo_gemini_flash:
+        print("      TOOL-SYSTEM-ERROR: El modelo Gemini Flash no está disponible.")
+        return ["Error: El modelo Gemini Flash no está configurado."]
+
+    for i, ruta_imagen in enumerate(rutas_imagenes):
+        print(f"      TOOL-SYSTEM: -> Analizando imagen {i+1}/{len(rutas_imagenes)}: {ruta_imagen}")
+        try:
+            imagen = Image.open(ruta_imagen)
+            contenido_request = [prompt_texto, imagen]
+            
+            # Nos aseguramos de llamar al modelo correcto
+            respuesta = modelo_gemini_flash.generate_content(contenido_request)
+            
+            if respuesta.text:
+                descripciones.append(respuesta.text)
+            else:
+                descripciones.append(f"[No se pudo generar descripción para la imagen {i+1}]")
+
+        except Exception as e:
+            error_msg = f"Error al procesar la imagen {ruta_imagen} con Gemini: {e}"
+            print(f"      TOOL-SYSTEM-ERROR: {error_msg}")
+            descripciones.append(f"[{error_msg}]")
+        
+        # Mantenemos la pausa por si acaso, es una buena práctica
+        if i < len(rutas_imagenes) - 1:
+            pausa = 20
+            print(f"      TOOL-SYSTEM: -> Pausa de {pausa} segundos para respetar el límite de la API...")
+            time.sleep(pausa)
+            
+    print("      TOOL-SYSTEM: -> Análisis de imágenes completado.")
+    return descripciones
