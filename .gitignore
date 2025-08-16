@@ -2,3 +2,9 @@ venv/
 archivos_subidos/
 
 .env
+
+
+# Ignorar cualquier archivo de base de datos de SQLite
+*.db
+*.sqlite3
+
