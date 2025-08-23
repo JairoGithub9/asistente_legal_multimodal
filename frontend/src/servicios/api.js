@@ -82,3 +82,29 @@ export const subirEvidencia = async (idCaso, archivo) => {
     throw error;
   }
 };
+
+
+/**
+ * Consulta el estado de una evidencia específica.
+ * @param {string} idEvidencia - El UUID de la evidencia a consultar.
+ * @returns {Promise<object>} Una promesa que resuelve a un objeto con el estado.
+ *                            Ej: { estado_procesamiento: 'completado' }
+ */
+export const obtenerEstadoEvidencia = async (idEvidencia) => {
+  try {
+    // Usamos fetch para hacer la petición GET al nuevo endpoint
+    const respuesta = await fetch(`${URL_BASE}/evidencias/${idEvidencia}/estado`);
+    
+    if (!respuesta.ok) {
+      throw new Error(`Error del servidor: ${respuesta.status}`);
+    }
+    
+    const datosEstado = await respuesta.json();
+    return datosEstado;
+
+  } catch (error) {
+    console.error(`Error al obtener el estado de la evidencia ${idEvidencia}:`, error);
+    // Devolvemos un estado de error para que el polling pueda detenerse si falla la llamada
+    return { estado_procesamiento: 'error_en_sondeo' };
+  }
+};

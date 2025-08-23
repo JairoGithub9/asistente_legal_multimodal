@@ -1,23 +1,51 @@
 /* frontend/src/componentes/FormularioSubirEvidencia/FormularioSubirEvidencia.css */
-.upload-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px dashed #ccc;
-  border-radius: 4px;
+
+.upload-form { /* Usando el nombre de clase de tu componente */
+  width: 100%;
+  padding: 1rem;
+  border: 1px dashed var(--color-borde);
+  border-radius: var(--radio-borde);
+  background-color: #fdfdfe;
+}
+
+.upload-form h4 {
+  margin-top: 0;
+  text-align: center;
+  color: var(--color-texto-secundario);
+}
+
+.upload-form input[type="file"] {
+  width: 100%;
+  margin-bottom: 1rem;
+  /* Estilos básicos para el selector de archivo */
+  border: 1px solid var(--color-borde);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
 }
 
 .upload-form button {
-  background-color: #28a745;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background-color: #22c55e; /* Un color verde para la acción de "subir" */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 .upload-form button:hover {
-  background-color: #218838;
+  background-color: #16a34a; /* Un verde más oscuro */
+}
+
+.upload-form button:active {
+  transform: scale(0.98);
 }
 
 .upload-form button:disabled {
-  background-color: #ccc;
+  background-color: #a0a0a0;
   cursor: not-allowed;
 }

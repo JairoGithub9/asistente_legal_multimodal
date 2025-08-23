@@ -1,16 +1,29 @@
 // frontend/src/componentes/FormularioSubirEvidencia/FormularioSubirEvidencia.jsx
-import { useState } from 'react';
-import { subirEvidencia } from '../../servicios/api';
+
+import React, { useState } from 'react';
 import './FormularioSubirEvidencia.css';
 
-const FormularioSubirEvidencia = ({ idCaso, onEvidenciaSubida }) => {
+/**
+ * Componente de formulario con una única responsabilidad:
+ * - Permitir al usuario seleccionar un archivo.
+ * - Avisar a su componente padre cuando el usuario quiere subir el archivo.
+ * - Gestionar su propio estado de "subiendo" para dar feedback al usuario.
+ */
+const FormularioSubirEvidencia = ({ onArchivoSeleccionado, estaProcesando }) => {
+  // Estado para guardar el archivo que el usuario elige.
   const [archivo, setArchivo] = useState(null);
-  const [estaSubiendo, setEstaSubiendo] = useState(false);
 
+  /**
+   * Se ejecuta cuando el usuario elige un archivo del explorador.
+   */
   const manejarSeleccionArchivo = (evento) => {
     setArchivo(evento.target.files[0]);
   };
 
+  /**
+   * Se ejecuta cuando el usuario hace clic en el botón "Subir Archivo".
+   * Ahora es mucho más simple.
+   */
   const manejarEnvio = async (evento) => {
     evento.preventDefault();
     if (!archivo) {
@@ -18,26 +31,24 @@ const FormularioSubirEvidencia = ({ idCaso, onEvidenciaSubida }) => {
       return;
     }
 
-    setEstaSubiendo(true);
-    try {
-      const casoActualizado = await subirEvidencia(idCaso, archivo);
-      alert(`¡Evidencia '${archivo.name}' subida con éxito!`);
-      onEvidenciaSubida(casoActualizado); // Avisamos al componente padre
-    } catch (error) {
-      alert(error.message,"Hubo un error al subir la evidencia.");
-    } finally {
-      setEstaSubiendo(false);
-      setArchivo(null);
-      evento.target.reset(); // Limpia el input de archivo
-    }
+    // ¡AVISAMOS AL PADRE!
+    // Llamamos a la función que nos pasó el componente padre (`VistaDetalleCaso`),
+    // y le entregamos el archivo que el usuario seleccionó.
+    // El padre se encargará de la lógica de subida y de poner `estaProcesando` en true.
+    await onArchivoSeleccionado(archivo);
+    
+    // Limpiamos el formulario para la siguiente subida.
+    setArchivo(null);
+    evento.target.reset();
   };
 
   return (
     <form onSubmit={manejarEnvio} className="upload-form">
       <h4>Añadir Nueva Evidencia</h4>
       <input type="file" onChange={manejarSeleccionArchivo} />
-      <button type="submit" disabled={!archivo || estaSubiendo}>
-        {estaSubiendo ? 'Subiendo...' : 'Subir Archivo'}
+      {/* El botón ahora se deshabilita con la prop `estaProcesando` que le pasa el padre */}
+      <button type="submit" disabled={!archivo || estaProcesando}>
+        {estaProcesando ? 'Procesando...' : 'Subir Archivo'}
       </button>
     </form>
   );

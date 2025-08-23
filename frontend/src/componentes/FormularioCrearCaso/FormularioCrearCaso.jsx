@@ -1,54 +1,66 @@
 // frontend/src/componentes/FormularioCrearCaso/FormularioCrearCaso.jsx
 
-import { useState } from 'react';
-// Importamos la función de nuestro servicio de API
+import React, { useState } from 'react';
 import { crearNuevoCaso } from '../../servicios/api';
-// Importamos los estilos específicos para este componente
 import './FormularioCrearCaso.css';
 
 const FormularioCrearCaso = ({ onCasoCreado }) => {
   const [titulo, setTitulo] = useState('');
   const [resumen, setResumen] = useState('');
+  const [estaCreando, setEstaCreando] = useState(false);
 
   const manejarEnvio = async (evento) => {
     evento.preventDefault();
+    if (!titulo.trim()) {
+      alert("El título del caso no puede estar vacío.");
+      return;
+    }
+    setEstaCreando(true);
     try {
-      const casoCreado = await crearNuevoCaso(titulo, resumen);
-      alert(`¡Caso creado con éxito! ID: ${casoCreado.id_caso}`);
+      const nuevoCaso = await crearNuevoCaso(titulo, resumen);
+      onCasoCreado(nuevoCaso);
       setTitulo('');
       setResumen('');
-      // ¡AVISAMOS A LA PÁGINA PRINCIPAL QUE REFRESQUE LA LISTA!
-      onCasoCreado(); 
-    } catch (error) {
-      alert(error.message,"Hubo un error al crear el caso. Revisa la consola.");
+    } catch (error) { // La variable 'error' se captura aquí
+      // --- ¡AQUÍ ESTÁ LA CORRECCIÓN! ---
+      // Ahora usamos la variable 'error' para mostrar más detalles en la consola.
+      // Esto elimina la advertencia y mejora nuestra capacidad de depuración.
+      console.error("Detalles del error al crear el caso:", error);
+      alert("Hubo un error al crear el caso. Revisa la consola para más detalles.");
+    } finally {
+      setEstaCreando(false);
     }
   };
 
-  
-
   return (
-    <form onSubmit={manejarEnvio} className="caso-form">
-      <h2>Crear Nuevo Caso</h2>
-      <div className="form-group">
-        <label htmlFor="titulo">Título del Caso</label>
-        <input
-          type="text"
-          id="titulo"
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
-          required
-        />
-      </div>
-      <div className="form-group">
-        <label htmlFor="resumen">Resumen Preliminar</label>
-        <textarea
-          id="resumen"
-          value={resumen}
-          onChange={(e) => setResumen(e.target.value)}
-        />
-      </div>
-      <button type="submit">Crear Caso</button>
-    </form>
+    <div className="formulario-crear-caso-contenedor">
+      <h3>Crear Nuevo Caso</h3>
+      <form onSubmit={manejarEnvio} className="formulario-crear-caso">
+        <div className="grupo-formulario">
+          <label htmlFor="titulo-caso">Título del Caso</label>
+          <input
+            id="titulo-caso"
+            type="text"
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            placeholder="Ej: Accidente de tránsito Pérez"
+            required
+          />
+        </div>
+        <div className="grupo-formulario">
+          <label htmlFor="resumen-caso">Resumen Preliminar</label>
+          <textarea
+            id="resumen-caso"
+            value={resumen}
+            onChange={(e) => setResumen(e.target.value)}
+            placeholder="Breve descripción de los hechos..."
+          />
+        </div>
+        <button type="submit" disabled={estaCreando || !titulo}>
+          {estaCreando ? 'Creando...' : 'Crear Caso'}
+        </button>
+      </form>
+    </div>
   );
 };
 

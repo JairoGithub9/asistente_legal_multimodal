@@ -1,67 +1,113 @@
 /* frontend/src/componentes/VistaDetalleCaso/VistaDetalleCaso.css */
+
+/* --- Contenedor Principal --- */
 .vista-detalle-contenedor {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Mensaje cuando no hay nada seleccionado --- */
+.vista-detalle-contenedor.placeholder {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--color-texto-secundario);
   height: 100%;
 }
 
-.vista-detalle-contenedor.placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #777;
+.vista-detalle-contenedor h2,
+.vista-detalle-contenedor h3 {
+  color: var(--color-primario);
+  margin-top: 0;
+  border-bottom: 2px solid var(--color-borde);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
+.vista-detalle-contenedor hr {
+  border: none;
+  border-top: 1px solid var(--color-borde);
+  margin: 1.5rem 0;
+}
+
+/* --- Contenedor de cada Evidencia ("Tarjeta") --- */
 .evidencia-card {
-  border: 1px solid #eee;
-  border-radius: 4px;
-  padding: 15px;
-  margin-top: 20px;
+  background-color: #f9fafb; /* Un fondo ligeramente distinto al de la columna */
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-borde);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
+.evidencia-card h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--color-texto-principal);
+}
+
+.evidencia-card > p { /* El párrafo que muestra el estado */
+  margin-top: 0;
+  font-weight: 600;
+  color: var(--color-texto-secundario);
+}
+
+/* Indicador de que algo se está procesando */
+.procesando-indicador {
+  color: var(--color-primario);
+  font-style: italic;
+  animation: pulso 1.5s infinite ease-in-out;
+}
+
+/* Animación sutil para el indicador de carga */
+@keyframes pulso {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* --- Contenedor para cada sección de resultados --- */
 .detalle-seccion {
-  margin-top: 15px;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--color-borde);
 }
 
 .detalle-seccion h5 {
-  margin-bottom: 5px;
-  color: #0056b3;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  color: var(--color-primario);
+  font-size: 1rem;
 }
 
-.detalle-seccion.estrategia {
-  background-color: #f8f9fa;
-  padding: 10px;
-  border-radius: 4px;
+/* --- Estilos para los bloques de texto (preformateado) --- */
+.detalle-seccion pre {
+  background-color: #eef2f5;
+  padding: 1rem;
+  border-radius: 6px;
+  /* La regla más importante: permite scroll horizontal si el texto es muy largo */
+  white-space: pre-wrap; /* Permite que el texto se ajuste */
+  word-wrap: break-word; /* Rompe palabras largas si es necesario */
+  max-height: 300px; /* Altura máxima antes de mostrar scroll vertical */
+  overflow: auto;
+  color: #334155;
+  font-size: 0.875rem;
 }
 
-.texto-contenido {
-  white-space: pre-wrap; /* Respeta los saltos de línea y espacios */
-  font-family: monospace;
-  background-color: #e9ecef;
-  padding: 5px;
-  border-radius: 3px;
+/* --- Estilos para la sección de Veredicto --- */
+.detalle-seccion.verificacion {
+  border-width: 2px;
+  border-style: solid;
+  padding: 1rem;
+  border-radius: var(--radio-borde);
 }
 
-pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-family: inherit;
-}
-
-.verificacion {
-  margin-top: 15px;
-  padding: 10px;
-  border-radius: 4px;
-  border-left: 5px solid;
-}
 .verificacion.verificado {
-  background-color: #e8f5e9;
-  border-color: #4caf50;
+  border-color: #22c55e; /* Verde para verificado */
+  background-color: #f0fdf4;
 }
+
 .verificacion.no-verificado {
-  background-color: #ffebee;
-  border-color: #f44336;
+  border-color: #ef4444; /* Rojo para no verificado */
+  background-color: #fef2f2;
 }

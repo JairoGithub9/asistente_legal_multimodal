@@ -11,52 +11,60 @@ import time
 def nodo_procesador_evidencia(estado: EstadoDelGrafo) -> dict:
     """
     Este nodo es el primer paso en el grafo. Llama a la herramienta apropiada
-    (audio, pdf, video) para extraer el texto de la evidencia.
-
-    Args:
-        estado (EstadoDelGrafo): El estado actual del grafo. Debe contener
-                                 la ruta_archivo y el tipo_contenido.
-
-    Returns:
-        dict: Un diccionario que contiene el campo 'texto_extraido' para
-              actualizar el estado del grafo.
+    (audio, pdf, video, imagen) para extraer el texto de la evidencia.
     """
     print("\n--- Entrando en el Nodo: Procesador de Evidencia ---")
     
-    # Obtenemos la información necesaria del estado actual
     ruta_archivo = estado.ruta_archivo
     tipo_contenido = estado.tipo_contenido
-    id_caso = estado.id_caso
+    # El id_caso no se usa en esta versión simplificada, así que lo podemos ignorar.
     
-    resultado_herramienta = {}
+    texto_extraido = None # Inicializamos la variable que contendrá el resultado
 
-    # Lógica de decisión que ya teníamos, pero ahora dentro de un nodo
-    if 'audio' in tipo_contenido:
-        print("    Decisión: Es un AUDIO. Llamando a la herramienta de transcripción...")
-        resultado_herramienta = herramientas_audio.procesar_audio_con_whisper(ruta_archivo)
+    # --- LÓGICA DE DECISIÓN SIMPLIFICADA Y CORREGIDA ---
+    try:
+        if 'audio' in tipo_contenido:
+            print("    Decisión: Es un AUDIO. Llamando a la herramienta de transcripción multimodal...")
+            # CAMBIO CLAVE: Ahora llamamos a la función genérica 'procesar_audio' del módulo.
+            # Esta es la función que internamente usa Gemini, como modificamos en el paso anterior.
+            texto_extraido = herramientas_audio.procesar_audio(ruta_archivo)
 
-    elif 'pdf' in tipo_contenido:
-        print("    Decisión: Es un PDF. Llamando a la herramienta de procesamiento (Nougat)...")
-        resultado_herramienta = herramientas_documentos.procesar_pdf_con_nougat(ruta_archivo)
+        elif 'pdf' in tipo_contenido:
+            print("    Decisión: Es un PDF. Llamando a la herramienta de procesamiento (Nougat)...")
+            # CAMBIO MENOR: Adaptamos la llamada para que sea consistente con las demás.
+            resultado = herramientas_documentos.procesar_pdf_con_nougat(ruta_archivo)
+            texto_extraido = resultado.get("texto_extraido")
 
-    elif 'video' in tipo_contenido:
-        print("    Decisión: Es un VIDEO. Llamando a la herramienta de procesamiento de video...")
-        resultado_herramienta = herramientas_video.procesar_video_con_opencv_y_gemini(ruta_archivo, id_caso)
+        elif 'video' in tipo_contenido:
+            print("    Decisión: Es un VIDEO. Llamando a la herramienta de procesamiento de video...")
+            # CAMBIO MENOR: Adaptamos la llamada para que sea consistente con las demás.
+            resultado = herramientas_video.procesar_video_con_opencv_y_gemini(ruta_archivo, estado.id_caso)
+            texto_extraido = resultado.get("texto_extraido")
         
-    else:
-        print(f"    Decisión: Tipo de archivo '{tipo_contenido}' no soportado. Usando simulación.")
-        resultado_herramienta = herramientas_documentos.procesar_documento_simulado(ruta_archivo)
-    
-    texto_extraido = resultado_herramienta.get("texto_extraido")
-    
-    if texto_extraido:
-        print(f"    Resultado: Texto extraído exitosamente ({len(texto_extraido)} caracteres).")
-    else:
-        print("    Resultado: No se pudo extraer texto.")
+        elif 'image' in tipo_contenido:
+            print("    Decisión: Es una IMAGEN. Llamando a la herramienta de análisis de imágenes...")
+            # CAMBIO MENOR: Adaptamos la llamada para que sea consistente con las demás.
+            descripciones = herramientas_lenguaje.describir_imagenes_con_gemini(
+                rutas_imagenes=[ruta_archivo],
+                prompt_texto="Describe esta imagen en detalle para un informe legal."
+            )
+            texto_extraido = "\n".join(descripciones) if descripciones else None
+            
+        else:
+            print(f"    Alerta: Tipo de contenido no soportado: {tipo_contenido}")
+            texto_extraido = f"Error: Tipo de archivo '{tipo_contenido}' no es soportado."
 
-    # El nodo devuelve un diccionario con las claves del estado que quiere modificar.
-    return {"texto_extraido": texto_extraido}
+        if texto_extraido and not texto_extraido.startswith("Error"):
+            print(f"    Resultado: Texto extraído exitosamente ({len(texto_extraido)} caracteres).")
+        else:
+            print(f"    Resultado: No se pudo extraer texto. Causa: {texto_extraido}")
+        
+        # Devolvemos un diccionario para actualizar el estado del grafo.
+        return {"texto_extraido": texto_extraido}
 
+    except Exception as e:
+        print(f"    ERROR CRÍTICO en el nodo procesador: {e}")
+        return {"texto_extraido": f"Error crítico en el procesamiento del archivo: {e}"}
 
 # =================================================================================
 # NODO 2: AGENTE INVESTIGADOR Y ANALISTA

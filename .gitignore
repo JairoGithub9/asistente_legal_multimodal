@@ -1,10 +1,26 @@
-venv/
-archivos_subidos/
+# Entorno virtual de Python
+/venv/
 
+# Archivos de caché de Python
+__pycache__/
+*.pyc
+
+# Dependencias de Node.js
+/frontend/node_modules/
+
+# Archivos de build o logs de Node.js
+/frontend/dist/
+/frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivo de variables de entorno (¡MUY IMPORTANTE!)
 .env
 
+# Archivos subidos por los usuarios
+/backend/archivos_subidos/
 
-# Ignorar cualquier archivo de base de datos de SQLite
-*.db
-*.sqlite3
-
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db

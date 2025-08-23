@@ -27,30 +27,33 @@ print("SETUP-LANGGRAPH: Nodos añadidos al grafo.")
 # =================================================================================
 def supervisor_de_calidad(estado: EstadoDelGrafo) -> str:
     """
-    Actúa como un supervisor para decidir si el trabajo está terminado,
-    necesita corrección, o si se ha excedido el límite de intentos.
+    Actúa como un supervisor inteligente para decidir el siguiente paso.
     """
     print("\n--- Entrando en el Supervisor de Calidad ---")
     
-    # --- ¡NUEVA LÓGICA DE SALIDA DE EMERGENCIA! ---
-    # Definimos un máximo de 2 intentos de corrección (3 pasadas en total).
-    MAXIMOS_INTENTOS = 2
-    intentos = estado.intentos_correccion
-    
-    if intentos >= MAXIMOS_INTENTOS:
-        print(f"    Decisión: Se ha alcanzado el límite de {MAXIMOS_INTENTOS} intentos de corrección. Finalizando.")
+    # --- ¡LA CORRECCIÓN! ---
+    # Cambiamos de la sintaxis de diccionario (estado.get("clave")) a la
+    # sintaxis de objeto (estado.atributo) para acceder a los datos.
+    if estado.entidades_extraidas is None or estado.borrador_estrategia is None:
+        print("    Decisión: Faltan datos críticos de nodos anteriores. Finalizando el ciclo.")
         return "__end__"
     # -----------------------------------------------
-
-    veredicto = estado.verificacion_calidad
     
-    if veredicto and veredicto.get("verificado"):
-        print("    Decisión: El borrador cumple con los estándares de calidad. Finalizando.")
+    # Lógica del límite de intentos (esta ya era correcta)
+    MAXIMOS_INTENTOS = 2
+    intentos = estado.intentos_correccion
+    if intentos >= MAXIMOS_INTENTOS:
+        print(f"    Decisión: Se ha alcanzado el límite de {MAXIMOS_INTENTOS} intentos. Finalizando.")
+        return "__end__"
+
+    # Lógica del veredicto (esta ya era correcta)
+    veredicto = estado.verificacion_calidad
+    if veredicto and veredicto.get("verificado"): # Usamos .get() aquí porque 'veredicto' SÍ es un diccionario
+        print("    Decisión: El borrador cumple con los estándares. Finalizando.")
         return "__end__"
     else:
-        print(f"    Decisión: El borrador NO cumple (Intento {intentos + 1}). Devolviendo al Sintetizador.")
+        print(f"    Decisión: El borrador NO cumple (Intento {intentos}). Devolviendo al Sintetizador.")
         return "sintetizador_estrategico"
-
 # =================================================================================
 # PASO 3: CONECTAR LOS NODOS PARA CREAR EL DIAGRAMA DE FLUJO
 # =================================================================================

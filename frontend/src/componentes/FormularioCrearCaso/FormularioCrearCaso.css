@@ -1,45 +1,79 @@
 /* frontend/src/componentes/FormularioCrearCaso/FormularioCrearCaso.css */
 
-.caso-form {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-align: left;
+.formulario-crear-caso-contenedor {
+  width: 100%;
 }
 
-.form-group {
-  margin-bottom: 15px;
+.formulario-crear-caso-contenedor h3 {
+  margin-top: 0;
+  color: var(--color-primario);
+  border-bottom: 2px solid var(--color-borde);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
-.form-group label {
+.formulario-crear-caso .grupo-formulario {
+  margin-bottom: 1rem;
+}
+
+.formulario-crear-caso label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--color-texto-secundario);
+  font-size: 0.9rem;
 }
 
-.form-group input,
-.form-group textarea {
+/* Estilo unificado para los campos de texto y áreas de texto */
+.formulario-crear-caso input[type="text"],
+.formulario-crear-caso textarea {
   width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 0.75rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Asegura que el padding no aumente el tamaño total */
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #fdfdfe;
 }
 
-.caso-form button {
+/* Efecto visual cuando el usuario hace clic en un campo */
+.formulario-crear-caso input[type="text"]:focus,
+.formulario-crear-caso textarea:focus {
+  outline: none;
+  border-color: var(--color-primario);
+  box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.1);
+}
+
+.formulario-crear-caso textarea {
+  min-height: 80px;
+  resize: vertical; /* Permite al usuario cambiar la altura verticalmente */
+}
+
+/* Estilo para el botón principal de la aplicación */
+.formulario-crear-caso button {
   width: 100%;
-  padding: 10px;
-  background-color: #007bff;
+  padding: 0.8rem 1rem;
+  background-color: var(--color-primario);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 16px;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
-.caso-form button:hover {
-  background-color: #0056b3;
+.formulario-crear-caso button:hover {
+  background-color: #004a80; /* Un azul un poco más oscuro */
+}
+
+.formulario-crear-caso button:active {
+  transform: scale(0.98); /* Efecto de "presionado" */
+}
+
+.formulario-crear-caso button:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+  transform: scale(1);
 }

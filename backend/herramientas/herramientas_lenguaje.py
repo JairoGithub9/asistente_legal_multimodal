@@ -200,7 +200,12 @@ def verificar_calidad_con_llm(borrador: str, contexto_original: str) -> dict:
 
 def describir_imagenes_con_gemini(rutas_imagenes: list[str], prompt_texto: str) -> list[str]:
     """
-    Analiza una lista de imágenes usando Gemini-Flash, con pausas para respetar los límites de la API.
+    Analiza una lista de imágenes usando Gemini-Flash.
+
+    VERSIÓN ROBUSTA:
+    - Ahora convierte las imágenes con transparencia (modo RGBA, como los PNG)
+      a modo RGB antes de procesarlas, evitando errores.
+    - Mantiene las pausas para respetar los límites de la API.
     """
     descripciones = []
     if not modelo_gemini_flash:
@@ -210,8 +215,16 @@ def describir_imagenes_con_gemini(rutas_imagenes: list[str], prompt_texto: str) 
         print(f"      TOOL-SYSTEM: -> Analizando imagen {i+1}/{len(rutas_imagenes)}...")
         try:
             imagen = Image.open(ruta_imagen)
+
+            # --- ¡AQUÍ ESTÁ LA CORRECCIÓN PARA PNGs! ---
+            # Si la imagen tiene transparencia (modo RGBA), la convertimos a RGB.
+            if imagen.mode == 'RGBA':
+                print("      TOOL-SYSTEM: -> Detectada imagen con transparencia (RGBA). Convirtiendo a RGB...")
+                imagen = imagen.convert('RGB')
+            # ----------------------------------------------
+
             buffered = io.BytesIO()
-            imagen.save(buffered, format="JPEG")
+            imagen.save(buffered, format="JPEG") # Ahora esto siempre funcionará
             img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
             mensaje = HumanMessage(

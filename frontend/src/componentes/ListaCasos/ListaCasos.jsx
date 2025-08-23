@@ -1,26 +1,35 @@
-// En ListaCasos.jsx
+// frontend/src/componentes/ListaCasos/ListaCasos.jsx
+import React from 'react';
 import './ListaCasos.css';
 
-// Aceptamos las nuevas propiedades onSeleccionarCaso y casoActivoId
+/**
+ * Muestra la lista de casos.
+ * AHORA PASA EL OBJETO 'caso' COMPLETO AL HACER CLIC.
+ */
 const ListaCasos = ({ casos, onSeleccionarCaso, casoActivoId }) => {
-  // ... (el if de casos.length === 0 no cambia) ...
-
   return (
     <div className="lista-casos-contenedor">
       <h2>Casos Creados</h2>
-      <ul className="lista-casos">
-        {casos.map((caso) => (
-          <li 
-            key={caso.id_caso} 
-            // Añadimos una clase si el caso es el que está activo
-            className={`caso-item ${caso.id_caso === casoActivoId ? 'activo' : ''}`}
-            // ¡Añadimos el evento onClick!
-            onClick={() => onSeleccionarCaso(caso.id_caso)}
-          >
-            {caso.titulo}
-          </li>
-        ))}
-      </ul>
+      {casos && casos.length > 0 ? (
+        <ul className="lista-casos">
+          {casos.map((caso) => (
+            // Agregamos una comprobación para asegurarnos de que 'caso' no sea undefined
+            caso && (
+              <li 
+                key={caso.id_caso} 
+                className={`caso-item ${caso.id_caso === casoActivoId ? 'activo' : ''}`}
+                // --- ¡LA CORRECCIÓN CLAVE ESTÁ AQUÍ! ---
+                // Le pasamos el objeto 'caso' completo a la función del padre.
+                onClick={() => onSeleccionarCaso(caso)}
+              >
+                {caso.titulo}
+              </li>
+            )
+          ))}
+        </ul>
+      ) : (
+        <p>Aún no has creado ningún caso.</p>
+      )}
     </div>
   );
 };

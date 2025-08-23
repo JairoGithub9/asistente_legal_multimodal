@@ -1,67 +1,72 @@
 // frontend/src/App.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // 1. Importamos useCallback
 import './App.css';
-import { obtenerTodosLosCasos } from './servicios/api';
-
-import FormularioCrearCaso from './componentes/FormularioCrearCaso/FormularioCrearCaso';
 import ListaCasos from './componentes/ListaCasos/ListaCasos';
-// ¡NUEVO! Importamos el componente de detalle
 import VistaDetalleCaso from './componentes/VistaDetalleCaso/VistaDetalleCaso';
+import FormularioCrearCaso from './componentes/FormularioCrearCaso/FormularioCrearCaso';
+import { obtenerTodosLosCasos } from './servicios/api';
 
 function App() {
   const [casos, setCasos] = useState([]);
-  // ¡NUEVO! Estado para guardar el caso que el usuario ha seleccionado
   const [casoSeleccionado, setCasoSeleccionado] = useState(null);
 
-  const refrescarCasos = async () => {
-    const casosRecibidos = await obtenerTodosLosCasos();
-    setCasos(casosRecibidos);
-  };
+  // --- 2. ENVOLVEMOS LA FUNCIÓN EN useCallback ---
+  /**
+   * Esta función ahora está "memorizada" por React. Solo se creará una nueva
+   * versión de esta función si su dependencia (`casoSeleccionado`) cambia.
+   * Esto resuelve el bug de las "funciones viejas" en los re-renders.
+   */
+  const recargarDatos = useCallback(async () => {
+    console.log("APP: Recargando todos los datos desde la API...");
+    const datosActualizados = await obtenerTodosLosCasos();
+    setCasos(datosActualizados);
 
+    // Si había un caso seleccionado, también actualizamos sus datos
+    if (casoSeleccionado) {
+      const casoRefrescado = datosActualizados.find(c => c.id_caso === casoSeleccionado.id_caso);
+      setCasoSeleccionado(casoRefrescado);
+    }
+  }, [casoSeleccionado]); // 3. Le decimos a useCallback que depende de `casoSeleccionado`
+  
   useEffect(() => {
-    refrescarCasos();
-  }, []);
+    recargarDatos();
+  }, [recargarDatos]); // Ahora la dependencia de useEffect es la propia función memorizada
 
-  // ¡NUEVO! Esta función se llamará cuando se haga clic en un caso de la lista
-  const manejarSeleccionCaso = (idCaso) => {
-    const caso = casos.find(c => c.id_caso === idCaso);
-    console.log("Caso seleccionado:", caso);
+  const manejarSeleccionCaso = (caso) => {
     setCasoSeleccionado(caso);
   };
 
-
-
-   // ¡NUEVO! Esta función se llamará cuando se suba una evidencia
-  const manejarEvidenciaSubida = (casoActualizado) => {
-    // Actualizamos el caso seleccionado con la nueva información
-    setCasoSeleccionado(casoActualizado);
+  const manejarCasoCreado = async (nuevoCaso) => {
+    console.log("APP: Nuevo caso creado. Refrescando la lista de casos.");
+    await recargarDatos();
     
-    // También actualizamos la lista general de casos para mantenerla sincronizada
-    setCasos(casosPrevios => casosPrevios.map(c => 
-      c.id_caso === casoActualizado.id_caso ? casoActualizado : c
-    ));
+    // Después de recargar, la nueva lista de 'casos' contendrá el nuevo caso.
+    // Lo buscamos para asegurarnos de tener el objeto más actualizado.
+    const casoRecienCreado = await obtenerTodosLosCasos().then(lista => lista.find(c => c.id_caso === nuevoCaso.id_caso));
+    setCasoSeleccionado(casoRecienCreado);
   };
-
+  
   return (
-    <div className="App">
-      <header className="App-header">
+    <div className="app-contenedor">
+      <header>
         <h1>Asistente Legal Multimodal</h1>
       </header>
-      <main className="contenedor-principal">
+      <main className="main-layout">
         <div className="columna-izquierda">
-          <FormularioCrearCaso onCasoCreado={refrescarCasos} />
+          <FormularioCrearCaso onCasoCreado={manejarCasoCreado} />
           <ListaCasos 
             casos={casos} 
             onSeleccionarCaso={manejarSeleccionCaso} 
-            casoActivoId={casoSeleccionado?.id_caso}
+            casoActivoId={casoSeleccionado ? casoSeleccionado.id_caso : null}
           />
         </div>
         <div className="columna-derecha">
-          <VistaDetalleCaso casoSeleccionado={casoSeleccionado}
-          // ¡NUEVO! Pasamos la función de actualización
-            onEvidenciaSubida={manejarEvidenciaSubida}
+          <VistaDetalleCaso 
+            casoSeleccionado={casoSeleccionado}
+            // Pasamos la función memorizada a los hijos
+            onEvidenciaSubida={recargarDatos}
+            onAnalisisCompleto={recargarDatos}
           />
-          
         </div>
       </main>
     </div>
