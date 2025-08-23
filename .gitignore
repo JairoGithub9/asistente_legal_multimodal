@@ -1,26 +1,60 @@
-# Entorno virtual de Python
+# =============================================================================
+# Archivos y Carpetas de Python
+# =============================================================================
+
+# Entorno virtual de Python. Contiene todas las librerías instaladas.
+# Nunca debe subirse al repositorio.
 /venv/
 
-# Archivos de caché de Python
+# Archivos de caché generados por Python. Se crean automáticamente.
 __pycache__/
 *.pyc
 
-# Dependencias de Node.js
+
+# =============================================================================
+# Archivos y Carpetas de Node.js / Frontend (React + Vite)
+# =============================================================================
+
+# Carpeta con todas las dependencias de JavaScript. Es muy pesada y se
+# reinstala con `npm install`.
 /frontend/node_modules/
 
-# Archivos de build o logs de Node.js
+# Carpeta con los archivos optimizados para producción. Se genera con `npm run build`.
 /frontend/dist/
+
+# Archivos de caché de Vite para acelerar el desarrollo.
 /frontend/.vite/
+
+# Archivos de log generados por npm o yarn.
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Archivo de variables de entorno (¡MUY IMPORTANTE!)
-.env
 
-# Archivos subidos por los usuarios
+# =============================================================================
+# Archivos de Usuario y Sensibles (¡MUY IMPORTANTE!)
+# =============================================================================
+
+# Archivo que contiene las claves de API y contraseñas. ¡NUNCA SUBIR!
+# El / al principio asegura que solo se ignore el de la raíz.
+/.env
+
+# Carpetas con los archivos subidos por los usuarios.
+# ¡CORREGIDO! Ignoramos la carpeta de la raíz Y la que está dentro del backend.
+/archivos_subidos/
 /backend/archivos_subidos/
 
-# Archivos del sistema operativo
+
+# =============================================================================
+# Archivos de Configuración de IDEs y Sistema Operativo
+# =============================================================================
+
+# Archivos del sistema operativo que no son parte del proyecto.
 .DS_Store
 Thumbs.db
+
+# Configuración del editor Visual Studio Code.
+.vscode/
+
+# Configuración de otros editores de la familia JetBrains (PyCharm, WebStorm).
+.idea/
